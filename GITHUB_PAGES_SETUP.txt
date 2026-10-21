@@ -1,0 +1,22 @@
+LEARNINGHUB - GITHUB PAGES UPLOAD INSTRUCTIONS
+
+1. Extract this ZIP on your computer.
+2. Open your GitHub repository > Add file > Upload files.
+3. Upload ALL EXTRACTED CONTENTS to the repository root (NOT inside an extra folder).
+   The root must contain index.html, login.html, firebase-auth.js, pdfs/, and .github/workflows/deploy.yml.
+   IMPORTANT: Some browser upload flows may not include hidden .github files. Check that the workflow exists in GitHub.
+4. Commit changes to the main branch (or master).
+5. Go to repository Settings > Pages > Build and deployment > Source: GitHub Actions.
+6. Open Actions > Deploy LearningHub to GitHub Pages; check for the green success icon.
+7. Firebase Console > Authentication > Settings > Authorized domains:
+   add YOUR-USERNAME.github.io (without https:// or repository name).
+8. Check your website at https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/
+
+Alternative: With Settings > Pages > Deploy from a branch, use main, /(root), NOT /docs.
+
+Notes:
+- GitHub Pages is static hosting and does not need Jekyll for this project.
+- Do NOT upload just the ZIP file into GitHub. Extract it first.
+- PDFs hosted on public GitHub Pages are accessible to anyone with their direct URL.
+- Firestore security rules must be published separately in Firebase Console.
+- This build fix does not guarantee Firebase authorization/login; Firebase settings and rules must also be correct.

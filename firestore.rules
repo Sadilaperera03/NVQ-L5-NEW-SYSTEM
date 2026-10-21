@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed() { return request.auth != null; }
+  function admin() { return signed() && request.auth.token.email == 'sadilaperera4545@gmail.com' && request.auth.token.email_verified == true; }
+  function verified() { return signed() && request.auth.token.email_verified == true; }
+  function hasProfile() { return exists(/databases/$(database)/documents/members/$(request.auth.uid)); }
+  function active() { return verified() && hasProfile() && get(/databases/$(database)/documents/members/$(request.auth.uid)).data.get('status','active') != 'blocked'; }
+  function short(s,n) { return s is string && s.size() > 0 && s.size() <= n; }
+  function optionalString(d,k,n) { return !d.keys().hasAny([k]) || (d[k] is string && d[k].size() <= n); }
+  match /members/{uid} {
+   allow create: if signed() && request.auth.uid == uid && request.resource.data.uid == uid
+    && request.resource.data.email == request.auth.token.email
+    && request.resource.data.role == 'member'
+    && short(request.resource.data.name,60)
+    && request.resource.data.createdAt == request.time
+    && request.resource.data.keys().hasOnly(['uid','name','email','role','createdAt']);
+   allow get: if admin() || (signed() && request.auth.uid == uid);
+   allow list: if admin();
+   allow update: if
+     (admin() && uid != request.auth.uid
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+      && request.resource.data.status in ['active','blocked'])
+     || (signed() && uid == request.auth.uid && resource.data.get('status','active') != 'blocked'
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','studentId','batch','semester','phone','progress'])
+      && short(request.resource.data.name,60)
+      && optionalString(request.resource.data,'studentId',30)
+      && optionalString(request.resource.data,'batch',30)
+      && optionalString(request.resource.data,'semester',30)
+      && optionalString(request.resource.data,'phone',30)
+      && (!request.resource.data.keys().hasAny(['progress']) || request.resource.data.progress is map)
+      );
+   allow delete: if false;
+  }
+  match /learning_hub_messages/{id} {
+   allow read: if admin() || active();
+   allow create: if active() && request.resource.data.uid == request.auth.uid
+    && request.resource.data.keys().hasAll(['uid','name','text','clientId','createdAt'])
+    && request.resource.data.keys().hasOnly(['uid','name','text','clientId','createdAt'])
+    && short(request.resource.data.name,32) && short(request.resource.data.text,500)
+    && request.resource.data.clientId is string && request.resource.data.clientId.size() <= 100
+    && request.resource.data.createdAt == request.time;
+   allow update: if false;
+   allow delete: if admin();
+  }
+  match /announcements/{id} {
+   allow read: if active() || admin();
+   allow create: if admin() && short(request.resource.data.title,120) && short(request.resource.data.body,3000) && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['title','body','createdAt']);
+   allow update: if false; allow delete: if admin();
+  }
+  match /assignments/{id} {
+   allow read: if active() || admin();
+   allow create: if admin() && short(request.resource.data.title,120) && short(request.resource.data.module,60) && short(request.resource.data.dueDate,10) && request.resource.data.body is string && request.resource.data.body.size() <= 3000 && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['title','module','dueDate','body','createdAt']);
+   allow update: if false; allow delete: if admin();
+  }
+  match /schedule/{id} {
+   allow read: if active() || admin();
+   allow create: if admin() && short(request.resource.data.title,120) && short(request.resource.data.when,20) && request.resource.data.body is string && request.resource.data.body.size() <= 300 && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['title','when','body','createdAt']);
+   allow update: if false; allow delete: if admin();
+  }
+  match /resources/{id} {
+   allow read: if active() || admin();
+   allow create: if admin() && short(request.resource.data.title,120) && short(request.resource.data.module,60) && short(request.resource.data.url,2000) && request.resource.data.url.matches('https://.*') && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['title','module','url','createdAt']);
+   allow update: if false; allow delete: if admin();
+  }
+  match /practiceQuizzes/{id} {
+   allow read: if active() || admin();
+   allow create: if admin() && short(request.resource.data.title,120) && short(request.resource.data.module,60) && request.resource.data.questions is list && request.resource.data.questions.size() > 0 && request.resource.data.questions.size() <= 30 && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['title','module','questions','createdAt']);
+   allow update: if false; allow delete: if admin();
+  }
+  match /submissions/{id} {
+   allow get,list: if admin() || (signed() && resource.data.uid == request.auth.uid);
+   allow create: if active() && id.matches(request.auth.uid + '_.*') && request.resource.data.uid == request.auth.uid && request.resource.data.email == request.auth.token.email && short(request.resource.data.assignmentId,200) && short(request.resource.data.assignmentTitle,120) && short(request.resource.data.url,2000) && request.resource.data.url.matches('https://.*') && request.resource.data.submittedAt == request.time && request.resource.data.keys().hasOnly(['uid','email','assignmentId','assignmentTitle','url','submittedAt']);
+   allow update: if active() && resource.data.uid == request.auth.uid && request.resource.data.uid == resource.data.uid && request.resource.data.email == resource.data.email && request.resource.data.assignmentId == resource.data.assignmentId && request.resource.data.assignmentTitle == resource.data.assignmentTitle && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['url','submittedAt']) && short(request.resource.data.url,2000) && request.resource.data.url.matches('https://.*') && request.resource.data.submittedAt == request.time;
+   allow delete: if false;
+  }
+  match /quizAttempts/{id} {
+   allow get,list: if admin() || (signed() && resource.data.uid == request.auth.uid);
+   allow create: if active() && request.resource.data.uid == request.auth.uid && short(request.resource.data.quizId,200) && short(request.resource.data.title,120) && request.resource.data.score is int && request.resource.data.total is int && request.resource.data.score >= 0 && request.resource.data.score <= request.resource.data.total && request.resource.data.total <= 30 && request.resource.data.createdAt == request.time && request.resource.data.keys().hasOnly(['uid','quizId','title','score','total','createdAt']);
+   allow update,delete: if false;
+  }
+ }
+}

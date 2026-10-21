@@ -1,0 +1,12 @@
+LEARNINGHUB — NETLIFY READY WEBSITE
+
+1. Upload this ZIP to https://app.netlify.com/drop or unzip and drag the entire folder contents.
+2. index.html checks Firebase login and redirects to login.html, home.html or admin.html.
+3. Firebase Authentication > Settings > Authorized domains: add your actual Netlify subdomain (no https://).
+4. Firebase Console > Firestore Database > Rules: review and publish firestore-admin.rules. Preserve other collection rules if you use them.
+5. Test registration, login, email verification, member chat, admin details/block/unblock/message deletion on your Netlify URL.
+6. If you update a file later, redeploy the site.
+
+Firebase configuration comes from your uploaded firebase-config.js. Firebase security rules require publication in the console; uploading this ZIP does not publish them automatically.
+
+Important: Client-side page guards are redirects, not access controls for publicly hosted HTML or PDFs. PDFs in /pdfs are accessible to anyone with their URL. To restrict content, use authenticated storage and server-enforced rules.

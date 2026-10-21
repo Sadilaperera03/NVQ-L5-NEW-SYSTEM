@@ -1,0 +1,19 @@
+LEARNING HUB — MODULE PDF LINKS
+
+1. Open services.html in your browser (use Live Server / web hosting).
+2. Click View Topics next to a module. Subtopics expand below it.
+3. For module K72T001M01, 7 sample topic names are already entered.
+4. Place each actual PDF inside pdfs/K72T001M01/ with the EXACT filename listed in module-resources.js. Until then, PDF links point to files that are not present and will not open.
+5. To add a PDF to another module, open module-resources.js, add a module code as a new key, then add objects with title and url. Example:
+
+  "K72T001M02": [
+    { "title": "01 - Introduction", "url": "pdfs/K72T001M02/01 - Introduction.pdf" },
+    { "title": "02 - Practical Notes", "url": "https://drive.google.com/file/d/YOUR_FILE_ID/view" }
+  ]
+
+6. Local PDF links use paths relative to services.html. Make folders under pdfs/ named after module code.
+7. Google Drive PDF links can be pasted instead. Set sharing to permit the intended readers.
+8. Upload the entire updated website folder including pdfs, modules.js, module-resources.js and services.html to the same server.
+9. Other website pages and Firebase files are unchanged.
+
+NOTE: PDF source files are NOT included in this ZIP because none were attached in this request. The seven topic titles are prepared from the filenames discussed; rename URLs to match your actual files.

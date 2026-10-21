@@ -1,0 +1,1 @@
+editz🍀 logo has replaced the small brand symbol throughout header/footer, LMS wordmarks, login and landing screen. editz-logo.png and favicon.png included. Firebase and application logic unchanged.
